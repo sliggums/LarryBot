@@ -18,8 +18,8 @@ BAG_OF_WORDS = ["RT giveaway", "RT #win", "RT chance win", "RT giving away", "RT
 BANNED_USERS = ['competition', "bot", "safarics", "csgo", "fut", "pokemon"]
 BANNED_WORDS = ["rt@", "csgo", "dragon", "rose", "blackops", "pokemon", "cod", "header", "baby", "madden", "fifa"]
 MIN_FOLLOWERS = 3000
+
 ENDING = ["by", "ends", "selected", "winner", "today", "tomorrow", "closes", "picked"]
-#current idea: try to infer the tweet's date and place them into files.
 
 def tweet(data):
     formatted = json.loads(data)
@@ -60,7 +60,7 @@ def tweet(data):
                 return
             # If asking us to follow a smaller account, we comply sometimes.
             elif len(others) == 1 and curr_followers > other_followers:
-                if random.random() > 0.3:
+                if random.random() < 0.3:
                     t.create_friendship(user_id=other)
                     writer.writerow([other])
     except KeyError:
@@ -88,8 +88,8 @@ oauth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 t = API(oauth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-today = (datetime.datetime.today() + datetime.timedelta(days=7)).day
-f = open(str(today) + ".csv", "a")
+day_to_delete = (datetime.datetime.today() + datetime.timedelta(days=7)).day
+f = open(str(day_to_delete) + ".csv", "a")
 writer = csv.writer(f)
 
 # def search_twitter():
