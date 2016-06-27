@@ -21,7 +21,9 @@ MIN_FOLLOWERS = 3000
 
 ENDING = ["by", "ends", "selected", "winner", "today", "tomorrow", "closes", "picked"]
 
-def tweet(data):
+list_of_tweets = set([])
+
+def get_id(data):
     formatted = json.loads(data)
     # If it's a reply, we know it's not what we want.
     if formatted['in_reply_to_status_id']:
@@ -33,14 +35,21 @@ def tweet(data):
     except KeyError:
         correct_tweet = formatted
 
+    correct_id = correct_tweet['id']
+    in_set = correct_id in list_of_tweets
+    list_of_tweets.add(correct_id)
+    return in_set, correct_id
+
+def tweet(tweet_id):
+    correct_tweet = t.get_status(tweet_id)
     # Make sure user is of some status and is not reposting something.
-    curr_followers = correct_tweet['user']['followers_count']
-    if curr_followers < MIN_FOLLOWERS or correct_tweet['entities']['urls']:
+    curr_followers = correct_tweet.author.followers_count
+    if curr_followers < MIN_FOLLOWERS or correct_tweet._json['entities']['urls']:
         return
 
     # Check whether it's something we don't want, which we specify at the top.
-    screen_name = correct_tweet['user']['screen_name']
-    tweet = correct_tweet['text']
+    screen_name = correct_tweet.author.screen_name
+    tweet = correct_tweet.text
     tweet_lower = tweet.lower().replace(" ", "")
     for word in BANNED_WORDS:
         if word in tweet_lower:
@@ -55,7 +64,7 @@ def tweet(data):
 
     # Check that this isn't an actual retweet.
     try:
-        others = correct_tweet['entities']['user_mentions']
+        others = correct_tweet._json['entities']['user_mentions']
         for person in others:
             other = int(person['id'])
             other_followers = t.get_user(other).followers_count
@@ -71,8 +80,7 @@ def tweet(data):
 
     # If all pass, we retweet.
     try:
-        tweet_id = correct_tweet['id']
-        user_id = correct_tweet['user']['id']
+        user_id = correct_tweet.author.id
         if "like" in tweet_lower:
             t.create_favorite(tweet_id)
         t.retweet(tweet_id)
@@ -82,11 +90,13 @@ def tweet(data):
         print "finished"
         time.sleep(random.random() * 50)
     except TweepError as e:
-        pass
+        print e
 
 class WinStreamListener(StreamListener):
     def on_data(self, data):
-        tweet(data)
+        in_set, tweet_id = get_id(data)
+        if not in_set:
+            tweet(tweet_id)
 
 oauth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
