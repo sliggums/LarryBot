@@ -50,6 +50,9 @@ def tweet(data):
         if user in user_lower:
             return
 
+    f = open(str(day_to_delete) + ".csv", "a")
+    writer = csv.writer(f)
+
     # Check that this isn't an actual retweet.
     try:
         others = correct_tweet['entities']['user_mentions']
@@ -75,6 +78,7 @@ def tweet(data):
         t.retweet(tweet_id)
         t.create_friendship(user_id=user_id)
         writer.writerow([user_id])
+        f.close()
         print "finished"
         time.sleep(random.random() * 50)
     except TweepError as e:
@@ -89,8 +93,6 @@ oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 t = API(oauth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 day_to_delete = (datetime.datetime.today() + datetime.timedelta(days=7)).day
-f = open(str(day_to_delete) + ".csv", "a")
-writer = csv.writer(f)
 
 # def search_twitter():
 #     print twit.search.tweets(q=BAG_OF_WORDS[1])['statuses']
