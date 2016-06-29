@@ -9,10 +9,12 @@ import datetime
 import re
 import csv
 
-ACCESS_TOKEN = raw_input()
-ACCESS_SECRET = raw_input()
-CONSUMER_KEY = raw_input()
-CONSUMER_SECRET = raw_input()
+g = open('config.txt', 'r')
+lines = g.readlines()
+for i in range(len(lines)):
+    lines[i] = lines[i].strip()
+
+ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = lines
 
 BAG_OF_WORDS = ["RT giveaway", "RT #win", "RT chance win", "RT giving away", "RT to enter"]
 BANNED_USERS = ['competition', "bot", "safarics", "csgo", "fut", "pokemon"]
@@ -42,6 +44,7 @@ def get_id(data):
 
 def tweet(tweet_id):
     correct_tweet = t.get_status(tweet_id)
+
     # Make sure user is of some status and is not reposting something.
     curr_followers = correct_tweet.author.followers_count
     if curr_followers < MIN_FOLLOWERS or correct_tweet._json['entities']['urls']:
@@ -65,6 +68,8 @@ def tweet(tweet_id):
     # Check that this isn't an actual retweet.
     try:
         others = correct_tweet._json['entities']['user_mentions']
+        if not others:
+            pass
         for person in others:
             other = int(person['id'])
             other_followers = t.get_user(other).followers_count
@@ -88,7 +93,7 @@ def tweet(tweet_id):
         writer.writerow([user_id])
         f.close()
         print "finished"
-        time.sleep(random.random() * 50)
+        time.sleep(random.random() * 100)
     except TweepError as e:
         print e
 
@@ -103,11 +108,6 @@ oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 t = API(oauth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 day_to_delete = (datetime.datetime.today() + datetime.timedelta(days=7)).day
-
-# def search_twitter():
-#     print twit.search.tweets(q=BAG_OF_WORDS[1])['statuses']
-# twit = Twitter(auth=OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET))
-# search_twitter()
 
 stream = Stream(oauth, WinStreamListener(), async=True, languages=['en'])
 while True:
