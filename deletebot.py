@@ -1,7 +1,7 @@
-from tweepy import Stream, OAuthHandler, API
-from tweepy.error import TweepError
+from tweepy import OAuthHandler, API
 from time import sleep
 from random import random
+import datetime
 
 
 g = open('config2.txt', 'r')
@@ -12,25 +12,25 @@ for i in range(len(lines)):
 ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = lines
 
 def delete():
-    f = open('4.csv', 'r')
-    g = open('5.csv', 'r')
+    day_to_delete = (datetime.datetime.today() + datetime.timedelta(days=7)).day
+    f = open(str(day_to_delete) + ".csv", "a")
     users = f.readlines()
-    users += g.readlines()
 
     for i in range(len(users)):
         users[i] = users[i][:-1]
-        print users[i]
 
     user_id = t.me().id
     for user in t.friends_ids(user_id):
-        if user not in users:
-            t.destroy_friendship(user)
-            print "destroyed"
-            sleep(150 * random())
+        t.destroy_friendship(user)
+        print "destroyed"
+        sleep(60 + 50 * random())
 
-
+    print "Done, exiting."
 
 oauth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 t = API(oauth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-delete()
+
+while True:
+    delete()
+    time.sleep(60 * 60 * 6)
