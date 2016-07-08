@@ -26,6 +26,7 @@ def delete():
         sleep(60 + 50 * random())
 
     print "Done, exiting."
+    time.sleep(60 * 60 * 6)
 
 oauth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 oauth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
@@ -33,4 +34,3 @@ t = API(oauth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 while True:
     delete()
-    time.sleep(60 * 60 * 6)

@@ -1,11 +1,9 @@
 import requests
 from requests_oauthlib import OAuth1
 
-import json
 import time
 import random
 import datetime
-import re
 import csv
 
 g = open('config.txt', 'r')
