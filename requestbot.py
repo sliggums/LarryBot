@@ -22,7 +22,7 @@ class LarryError(Exception):
 
 class LarryBot:
 
-    BAG_OF_WORDS = ["chance win", "giving away"]
+    BAG_OF_WORDS = ["RT chance win", "RT giving away", "RT to enter"]
     BANNED_USERS = ['competition', "bot", "safarics", "csgo", "fut", "pokemon"]
     BANNED_WORDS = ["rt @", "csgo", "dragon", "rose", "blackops", "pokemon", "cod", "header", "baby", "madden", "fifa", "funko", "uk"]
     MIN_FOLLOWERS = 1000
@@ -99,7 +99,6 @@ class LarryBot:
                 try:
                     r = self.search(words)
                     for data in r['statuses']:
-                        print data['text']
                         in_set, tweet_id = self.get_id(data)
                         if not in_set:
                             self.tweet(tweet_id)
@@ -126,9 +125,7 @@ class LarryBot:
 
         # Make sure user is of some status and is not reposting something.
         curr_followers = correct_tweet['user']['followers_count']
-        print "curr_followers is: " + str(curr_followers)
         if curr_followers < self.MIN_FOLLOWERS or correct_tweet['entities']['urls']:
-            print "is a retweet or not enough followers"
             return
 
         # Check whether it's something we don't want, which we specify at the top.
@@ -137,9 +134,6 @@ class LarryBot:
         tweet = correct_tweet['text']
         tweet_lower = tweet.lower()
 
-        if "rt" not in tweet_lower and "retweet" not in tweet_lower:
-            print "not a giveaway"
-            return
         for word in self.BANNED_WORDS:
             if word in tweet_lower:
                 return
@@ -155,7 +149,6 @@ class LarryBot:
 
         # Check that this isn't an actual retweet.
         others = correct_tweet['entities']['user_mentions']
-        print others
         if others:
             for person in others:
                 other_id = person['id']
@@ -173,17 +166,14 @@ class LarryBot:
         # If all pass, we retweet.
         user_id = correct_tweet['user']['id']
         if "like" in tweet_lower or "fav" in tweet_lower:
-            print "likes or fav"
             self.like(tweet_id)
         if "follow" in tweet_lower:
-            print "add friend"
             self.add_friend(user_id)
         self.retweet(tweet_id)
-        print "retweeted"
         writer.writerow([user_id])
         f.close()
         print "finished"
-        time.sleep(random.random() * 50)
+        time.sleep(30 + random.random() * 50)
 
 if __name__ == "__main__":
     c = LarryBot()
